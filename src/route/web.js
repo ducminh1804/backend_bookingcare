@@ -1,7 +1,13 @@
 // src/routes/userRoutes.js
 const express = require("express");
-const { createNewUser,getAllUser,editUser,deleteUser,loginUser } = require("../controllers/userController.js");
-
+const {
+  createNewUser,
+  getAllUser,
+  editUser,
+  deleteUser,
+  loginUser,
+} = require("../controllers/userController.js");
+const { verifyToken, checkRole } = require("../middleware/token.js");
 const router = express.Router();
 
 const initWebRouter = (app) => {
@@ -66,7 +72,7 @@ const initWebRouter = (app) => {
    */
   router.post("/register", createNewUser);
 
-  router.post("/login",loginUser)
+  router.post("/login", loginUser);
 
   /**
    * @swagger
@@ -77,11 +83,15 @@ const initWebRouter = (app) => {
    *       200:
    *         description: Success
    */
-  router.get("/getall",getAllUser)
+  router.get("/getall", verifyToken, checkRole(12), getAllUser);
 
-  router.patch("/edit/:id",editUser)
+  router.patch("/edit/:id", editUser);
 
-  router.delete("/delete/:id",deleteUser)
+  router.delete("/delete/:id", deleteUser);
+
+  router.get("/token", verifyToken, checkRole(12), (req, res) => {
+    res.json(req.user);
+  });
   return app.use("/", router);
 };
 
